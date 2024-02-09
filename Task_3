@@ -1,0 +1,159 @@
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+class Student {
+    private String name;
+    private int rollNumber;
+    private String grade;
+
+    public Student(String name, int rollNumber, String grade) {
+        this.name = name;
+        this.rollNumber = rollNumber;
+        this.grade = grade;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getRollNumber() {
+        return rollNumber;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+}
+
+class StudentManagementSystem {
+    private List<Student> students;
+
+    public StudentManagementSystem() {
+        this.students = new ArrayList<>();
+    }
+
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+    }
+
+    public Student searchStudent(int rollNumber) {
+        for (Student student : students) {
+            if (student.getRollNumber() == rollNumber) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    public void displayAllStudents() {
+        for (Student student : students) {
+            System.out.println(student.getName() + " - " + student.getRollNumber() + " - " + student.getGrade());
+        }
+    }
+
+    public void saveStudentsToFile() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("students.txt"))) {
+            for (Student student : students) {
+                writer.println(student.getName() + "," + student.getRollNumber() + "," + student.getGrade());
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while saving student data to file.");
+        }
+    }
+
+    public void loadStudentsFromFile() {
+        try (Scanner scanner = new Scanner(new File("students.txt"))) {
+            while (scanner.hasNextLine()) {
+                String[] data = scanner.nextLine().split(",");
+                Student student = new Student(data[0], Integer.parseInt(data[1]), data[2]);
+                addStudent(student);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found. Creating new student database.");
+        }
+    }
+
+    public List<Student> getStudents() {
+        return students;
+    }
+}
+
+public class InternshipProject {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        StudentManagementSystem system = new StudentManagementSystem();
+        system.loadStudentsFromFile();
+
+        while (true) {
+            System.out.println("\nStudent Management System Menu:");
+            System.out.println("1. Add a new student");
+            System.out.println("2. Remove a student");
+            System.out.println("3. Search for a student");
+            System.out.println("4. Display all students");
+            System.out.println("5. Save and Exit");
+
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter student name: ");
+                    scanner.nextLine();
+                    String name = scanner.nextLine();
+                    System.out.print("Enter student roll number: ");
+                    int rollNumber = scanner.nextInt();
+                    System.out.print("Enter student grade: ");
+                    String grade = scanner.next();
+
+                    Student newStudent = new Student(name, rollNumber, grade);
+                    system.addStudent(newStudent);
+                    break;
+
+                case 2:
+                    System.out.print("Enter the roll number of the student to remove: ");
+                    int removeRollNumber = scanner.nextInt();
+                    Student toRemove = system.searchStudent(removeRollNumber);
+                    if (toRemove != null) {
+                        system.removeStudent(toRemove);
+                        System.out.println("Student removed.");
+                    } else {
+                        System.out.println("Student not found.");
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Enter the roll number of the student to search: ");
+                    int searchRollNumber = scanner.nextInt();
+                    Student foundStudent = system.searchStudent(searchRollNumber);
+                    if (foundStudent != null) {
+                        System.out.println("Student found: " + foundStudent.getName() + " - " + foundStudent.getRollNumber() + " - " + foundStudent.getGrade());
+                    } else {
+                        System.out.println("Student not found.");
+                    }
+                    break;
+
+                case 4:
+                    System.out.println("All students:");
+                    system.displayAllStudents();
+                    break;
+
+                case 5:
+                    system.saveStudentsToFile();
+                    System.out.println("Student data saved. Exiting...");
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+}
+
+
